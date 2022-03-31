@@ -2,3 +2,4 @@ test
 tmp
 *.log
 user.conf
+log.txt
