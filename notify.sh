@@ -44,8 +44,8 @@ function parse_msg()
 
 function push_all()
 {
-    # parse_msg
-    ./push.sh "$TITLE" "${PUSH_DIGEST}" "${PUSH_CONTENT}" "$IMG_PUSH" >> ./log.txt
+    # parse_msg $1标题,$2内容$3未处理内容$4封面$5TMDB地址
+    ./push.sh "$TITLE" "${PUSH_DIGEST}" "${PUSH_CONTENT}" "$IMG_PUSH" "$TMDB_URL">> ./log.txt
 }
 
 # 版本信息
@@ -74,6 +74,7 @@ function display_help()
     exit 0
 }
 
+# 测试
 function test()
 {
     echo "base_root:" $BASE_ROOT >> ./log.txt
@@ -83,24 +84,27 @@ function test()
     MSG="内容：无\n时间：$(date +'%H:%M:%S')"
     echo $MSG >> ./log.txt
     IMG_PUSH=$DEFAULT_PIC
+    get_img_url
     parse_msg
     push_all
 }
 
+# 文字截取
 function get_new_str()
+# 改为200字符
 {
     len_old_str=${#old_str}
     echo "字符串长度：" "${len_old_str}" >> ./log.txt
-    if [ $len_old_str -gt 120 ]; then
-        echo "字符串大约120"
-        new_str="${old_str:0:120}...."
+    if [ $len_old_str -gt 200 ]; then
+        echo "字符串大约200"
+        new_str="${old_str:0:200}...."
     else
         new_str=$old_str
     fi
     echo ""
 }
 
-
+# 获取封面
 function get_img_url()
 {
     echo "电影播放脚本入口：" >> ./log.txt
@@ -121,6 +125,9 @@ function get_img_url()
         echo "图片：" $IMG_PUSH >> ./log.txt
         echo "非空" >> ./log.txt
     fi
+    # TMDB地址
+    TMDB_URL="https://www.themoviedb.org/${MEDIA_TYPE}/${TMDB_ID}"
+    echo "TMDB_URL：" $TMDB_URL >> ./log.txt
 }
 
 
@@ -129,6 +136,7 @@ if [ ! "$1" ]; then
     echo "空参"
 elif [ "$1" = "-v" ]; then
    version
+# 电影入库
 elif [ $1 = "AM" ]; then
     # 2-剧名|3-剧情|4-tmdb
     echo "电影入库脚本入口："
@@ -139,19 +147,25 @@ elif [ $1 = "AM" ]; then
 
     get_img_url
 
+    if [ $TMDB_ID = "%item.meta.tmdb%" ]; then
+    TMDB_ID="无"
+    fi
+
     if [ $MEDIA_MSG = "%item.overview%" ]; then
         MEDIA_MSG="暂无简介"
     fi
-    old_str=$MEDIA_MSG
-    get_new_str
-    MEDIA_MSG=$new_str
+    # 截取简介
+    # old_str=$MEDIA_MSG
+    # get_new_str
+    # MEDIA_MSG=$new_str
 
     MEDIA_NAME="$(echo "$MEDIA_NAME" | sed 's/[ ][ ]*//g')"
 
-    MSG="剧情：$MEDIA_MSG\n时间：$(date +'%H:%M:%S')"
+    MSG="入库时间：$(date +'%H:%M:%S')\nTMDB:$TMDB_ID\n剧情简介：$MEDIA_MSG"
     TITLE="电影入库：$MEDIA_NAME" >> ./log.txt
     parse_msg
     push_all
+# 剧集入库
 elif [ $1 = "AT" ]; then
     # 2-剧名|3-剧情|4-tmdb|5-季x|6-集x
     echo "电视剧入库脚本入口："
@@ -168,20 +182,25 @@ elif [ $1 = "AT" ]; then
             MEDIA_NAME="$(echo "$MEDIA_NAME" | sed 's/\%season\.number\%/0/g')" ;;
     esac
 
+    if [ $TMDB_ID = "%series.meta.tmdb%" ]; then
+        TMDB_ID="无"
+    fi
+
     if [ $MEDIA_MSG = "%item.overview%" ]; then
         MEDIA_MSG="暂无简介"
     fi
-
-    old_str=$MEDIA_MSG
-    get_new_str
-    MEDIA_MSG=$new_str
+    # 截取简介
+    # old_str=$MEDIA_MSG
+    # get_new_str
+    # MEDIA_MSG=$new_str
 
     MEDIA_NAME="$(echo "$MEDIA_NAME" | sed 's/[ ][ ]*//g')"
     MEDIA_MSG="$(echo "$MEDIA_MSG" | sed 's/[ ][ ]*//g')"
     TITLE="剧集入库：$MEDIA_NAME-${SE_NUM}"
-    MSG="剧情：$MEDIA_MSG\n时间：$(date +'%H:%M:%S')"
+    MSG="入库时间：$(date +'%H:%M:%S')\nTMDB:$TMDB_ID\n剧情简介：$MEDIA_MSG"
     parse_msg
     push_all
+# 播放电影
 elif [ $1 = "PM" ]; then
     # 0-脚本
     # 1-脚本参数
@@ -202,12 +221,13 @@ elif [ $1 = "PM" ]; then
     old_str=$MEDIA_MSG
     get_new_str
     MEDIA_MSG=$new_str
-    MSG="用户：$2\n设备：$DEV_NAME\n进度：$PERCENT%\n剧情：$MEDIA_MSG\n时间：$(date +'%H:%M:%S')"
+    MSG="时间：$(date +'%H:%M:%S')\n用户：$2\n设备：$DEV_NAME\n进度：$PERCENT%\n剧情：$MEDIA_MSG"
 
     TITLE="播放电影：$MEDIA_NAME"
     echo "$TITLE" >> ./log.txt
     parse_msg
     push_all
+# 播放剧集
 elif [ $1 = "PT" ]; then
     # 0-脚本
     # 1-脚本参数
@@ -227,16 +247,17 @@ elif [ $1 = "PT" ]; then
     fi
     MEDIA_NAME="$(echo "$MEDIA_NAME" | sed 's/[ ][ ]*//g')"
     echo "$MEDIA_MSG" >> ./log.txt
-    old_str=$MEDIA_MSG
-    get_new_str
-    MEDIA_MSG=$new_str
-    MSG="用户：$2\n设备：$DEV_NAME\n进度：$PERCENT%\n剧情：$MEDIA_MSG\n时间：$(date +'%H:%M:%S')"
+    # old_str=$MEDIA_MSG
+    # get_new_str
+    # MEDIA_MSG=$new_str
+    MSG="时间：$(date +'%H:%M:%S')\n用户：$2\n设备：$DEV_NAME\n进度：$PERCENT%\n剧情：$MEDIA_MSG"
     # MEDIA_NAME="$(echo "$MEDIA_NAME" | sed 's/[ ][ ]*//g')"
     # MSG="用户：$2\n剧集：$MEDIA_NAME\n时间：$(date +'%H:%M:%S')"
     TITLE="播放剧集：${MEDIA_NAME}-${SE_NUM}"
     echo "$TITLE" >> ./log.txt
     parse_msg
     push_all
+# 停止电影
 elif [ $1 = "SM" ]; then
     # 0-脚本
     # 1-脚本参数
@@ -244,18 +265,19 @@ elif [ $1 = "SM" ]; then
     echo "电影停止" >> ./log.txt
     MEDIA_TYPE="movie"
     MEDIA_NAME=$3
-    DEV_NAME=$5
+    DEV_NAME=$5  
     get_img_url
     MEDIA_NAME="$(echo "$MEDIA_NAME" | sed 's/[ ][ ]*//g')"
-    MSG="用户：$2\n设备：$DEV_NAME\n时间：$(date +'%H:%M:%S')"
+    MSG="时间：$(date +'%H:%M:%S')\n用户：$2\n设备：$DEV_NAME"
     TITLE="停止播放电影：$MEDIA_NAME"
     echo "$TITLE" >> ./log.txt
     parse_msg
     push_all
+# 停止剧集
 elif [ $1 = "ST" ]; then
     # 0-脚本
     # 1-脚本参数
-    # 2-用户名|3-剧名|4-tmdb|5-设备|6-季x|7-集x|
+    # 2-用户名|3-剧名|4-tmdb|5-设备|6-季x|7-集x
     echo "剧集停止" >> ./log.txt
     MEDIA_NAME=$3
     DEV_NAME=$5
@@ -265,19 +287,21 @@ elif [ $1 = "ST" ]; then
     MEDIA_TYPE="tv"
     get_img_url
     MEDIA_NAME="$(echo "$MEDIA_NAME" | sed 's/[ ][ ]*//g')"
-    MSG="用户：$2\n设备：$DEV_NAME\n时间：$(date +'%H:%M:%S')"
+    MSG="时间：$(date +'%H:%M:%S')\n用户：$2\n设备：$DEV_NAME"
     TITLE="停止播放剧集：${MEDIA_NAME}-${SE_NUM}"
     echo "$TITLE" >> ./log.txt
     parse_msg
     push_all
+# 登录成功
 elif [ $1 = "LS" ]; then
-    MSG="用户：$2\n地址：$3\n时间：$(date +'%H:%M:%S')\n设备：$4"
+    MSG="时间：$(date +'%H:%M:%S')\n用户：$2\n地址：$3\n设备：$4"
     TITLE="登录成功"
     IMG_PUSH=$DEFAULT_PIC
     parse_msg
     push_all
+# 登录失败
 elif [ $1 = "LF" ]; then
-    MSG="用户：$2\n地址：$3\n密码：$4\n时间：$(date +'%H:%M:%S')\n设备：$5"
+    MSG="时间：$(date +'%H:%M:%S')\n用户：$2\n地址：$3\n密码：$4\n设备：$5"
     TITLE="登录失败"
     IMG_PUSH=$DEFAULT_PIC
     parse_msg

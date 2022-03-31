@@ -5,10 +5,15 @@ TOOLS_DIR=${BASE_ROOT}/tools
 cd ${BASE_ROOT}
 . ./user.conf
 
-
+# 入参
+# $TITLE
 TITLE="$1"
+# $PUSH_DIGEST
 DIGE="$2"
+# $IMG_PUSH
 PIC_URL="$4"
+# $TMDB_URL
+URL="$5"
 
 
 function qywx()
@@ -28,7 +33,8 @@ function qywx()
            {
                "title": "${TITLE}",
                "description": "${DIGE}",
-               "picurl": "${PIC_URL}"
+               "picurl": "${PIC_URL}",
+               "url":"${URL}"
             }
        ]
    },

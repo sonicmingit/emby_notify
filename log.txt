@@ -1,0 +1,15 @@
+http://img.sonicming.top/qywx/emby1-1.png
+剧集停止
+电影播放脚本入口：
+TMDB_ID： 129888
+图片路径： /1ccmQi5WxLM3MUZMwnx2bYtAXP9.jpg
+是否找到： /1ccmQi5WxLM3MUZMwnx2bYtAXP9.jpg
+图片： https://image.tmdb.org/t/p/w500/1ccmQi5WxLM3MUZMwnx2bYtAXP9.jpg
+非空
+TMDB_URL： https://www.themoviedb.org/'tv'/'129888'
+停止播放剧集：二十五，二十一-S1E1
+{"errcode":0,"errmsg":"ok","msgid":"WpLDpQFMGSE843kRbNhgXQt0xSkuiwu04AT-0VOxKPOBYpLuRsY30E3dzfIBXojKSiH7aGb0J0qfaJdkQfPJjQ"}
+删除临时文件
+未配置pushplus参数，跳过通知！
+未配置Bark参数，跳过通知！
+未配置电报参数或者配置不全，跳过通知！
