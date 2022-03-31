@@ -247,9 +247,9 @@ elif [ $1 = "PT" ]; then
     fi
     MEDIA_NAME="$(echo "$MEDIA_NAME" | sed 's/[ ][ ]*//g')"
     echo "$MEDIA_MSG" >> ./log.txt
-    # old_str=$MEDIA_MSG
-    # get_new_str
-    # MEDIA_MSG=$new_str
+    old_str=$MEDIA_MSG
+    get_new_str
+    MEDIA_MSG=$new_str
     MSG="时间：$(date +'%H:%M:%S')\n用户：$2\n设备：$DEV_NAME\n进度：$PERCENT%\n剧情：$MEDIA_MSG"
     # MEDIA_NAME="$(echo "$MEDIA_NAME" | sed 's/[ ][ ]*//g')"
     # MSG="用户：$2\n剧集：$MEDIA_NAME\n时间：$(date +'%H:%M:%S')"
