@@ -109,7 +109,9 @@ function get_img_url()
 {
     echo "电影播放脚本入口：" >> ./log.txt
     echo "TMDB_ID：" "$TMDB_ID" >> ./log.txt
-    RES_TMDB=$("${TOOLS_DIR}"/curl -s 'https://api.themoviedb.org/3/'${MEDIA_TYPE}'/'${TMDB_ID}'/images?api_key='${TMDB_API_KEY}'')
+    #RES_TMDB=$("${TOOLS_DIR}"/curl -s 'https://api.themoviedb.org/3/'${MEDIA_TYPE}'/'${TMDB_ID}'/images?api_key='${TMDB_API_KEY}'')
+    # 群晖curl https报错解决方案
+    RES_TMDB=$("${TOOLS_DIR}"/curl -s --resolve api.themoviedb.org:443:99.86.4.16 "https://api.themoviedb.org/3/${MEDIA_TYPE}/${TMDB_ID}/images?api_key=${TMDB_API_KEY}")
     IMG_PATH=$(echo ${RES_TMDB} | "${TOOLS_DIR}"/jq --raw-output '.backdrops | .[0] | .file_path')
     echo "图片路径：" $IMG_PATH >> ./log.txt
     RES_FIND_JPG=$(echo $IMG_PATH | grep "jpg")
